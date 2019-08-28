@@ -1,0 +1,42 @@
+{
+  "name": "serverless-stateful-linebot-framework",
+  "version": "0.1.0",
+  "description": "Stateful LINE bot on the AWS Serverless",
+  "repository": "https://github.com/lacti/serverless-stateful-linebot-framework",
+  "author": "jaeyoung.choi <lactrious@gmail.com>",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@line/bot-sdk": "^6.8.2",
+    "@yingyeothon/actor-system": "^0.1.8",
+    "@yingyeothon/actor-system-aws-lambda-support": "^0.1.6",
+    "@yingyeothon/actor-system-redis-support": "^0.1.3",
+    "@yingyeothon/logger": "^0.1.0",
+    "@yingyeothon/repository": "^0.1.3",
+    "@yingyeothon/repository-s3": "^0.1.3",
+    "fast-copy": "^2.0.3",
+    "fast-equals": "^2.0.0",
+    "ioredis": "^4.14.0",
+    "mem": "^5.1.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.31",
+    "@types/ioredis": "^4.0.15",
+    "@types/node": "10",
+    "prettier": "^1.18.2",
+    "tslint": "^5.19.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.5.3"
+  }
+}
