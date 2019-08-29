@@ -8,7 +8,8 @@ import { ConsoleLogger } from "@yingyeothon/logger";
 import IORedis from "ioredis";
 import mem from "mem";
 import { StateMap } from "./entity";
-import { CommandProcessor, ICommandRequest } from "./handler";
+import { CommandProcessor } from "./handler";
+import { reply } from "./line";
 
 const logger = new ConsoleLogger("debug");
 const getRedis = mem(() => {
@@ -35,15 +36,25 @@ export const getSystem = mem(() =>
       })
 );
 
-export const newBasicActor = <E, S extends StateMap<S>>(
-  newProcessor: (id: string) => CommandProcessor<E, S>
+export interface ICommandRequest {
+  command: string;
+  replyToken: string;
+}
+
+export const newBasicReplyActor = <E, S extends StateMap<S>, T>(
+  newProcessor: (id: string) => CommandProcessor<E, S, T>
 ) => (id: string) => {
   const processor = newProcessor(id);
   return getSystem().spawn<ICommandRequest>(id, actor =>
     actor
       .on("beforeAct", processor.prepareContext)
       .on("afterAct", processor.storeContext)
-      .on("act", ({ message }) => processor.processCommand(message))
+      .on("act", async ({ message: { command, replyToken } }) => {
+        const response = await processor.processCommand(command);
+        if (response) {
+          await reply(replyToken, response);
+        }
+      })
       .on("error", error => logger.error(`ActorError`, id, error))
   );
 };

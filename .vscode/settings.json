@@ -8,6 +8,7 @@
   "search.exclude": {
     "**/node_modules": true,
     "**/.serverless": true,
-    "**/.webpack": true
+    "**/.webpack": true,
+    "**/lib": true
   }
 }

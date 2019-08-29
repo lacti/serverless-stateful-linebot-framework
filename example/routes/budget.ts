@@ -1,8 +1,7 @@
-import { Route } from "../../src";
 import { BudgetCommand } from "../handlers/budget";
-import p from "../models/route";
+import tk from "../toolkit";
 
-const routes: Route<BudgetCommand> = {
+const routes = tk.routes<BudgetCommand>({
   addBudget: {
     regex: /예산 추가!/,
     parse: args => ({
@@ -10,8 +9,8 @@ const routes: Route<BudgetCommand> = {
       amount: +args[1]
     })
   }
-};
+});
 
-export default p.route({
+export default tk.partialStateRoutes({
   budget: routes
 });

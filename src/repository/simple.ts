@@ -12,7 +12,7 @@ export class SimpleGetSetRepository<T> {
 
   constructor({ prefix, id }: ISimpleGetSetRepositoryOptions) {
     this.id = id;
-    this.internal = newInternalRepository(prefix ? `${prefix}/` : "");
+    this.internal = newInternalRepository(prefix || "");
   }
 
   public async get() {

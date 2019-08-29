@@ -2,35 +2,26 @@ import { ConsoleLogger } from "@yingyeothon/logger";
 import copy from "fast-copy";
 import { deepEqual } from "fast-equals";
 import { EntityStateHolder, IState, StateMap } from "../entity";
-import * as line from "../line";
 import { SimpleGetSetRepository } from "../repository";
-import { lookupHandler, StateHandler, StateRoute } from "./router";
+import { lookupHandler, StateRouteHandlers } from "./router";
 
 const logger = new ConsoleLogger("debug");
+const pjson = (obj: any) => JSON.stringify(obj, null, 2);
 
 interface ITuple<E, S> {
-  entity: E;
-  state: S;
+  entity?: E;
+  state?: S;
 }
 
-export interface IProcessorOptions<E, S extends StateMap<S>> {
+export interface IProcessorOptions<E, S extends StateMap<S>, T> {
   bucketPrefix?: string;
-  routes: StateRoute<S>;
-  handlers: StateHandler<E, S>;
+  routeHandlers: StateRouteHandlers<E, S, T>;
   initialState: () => IState<S>;
   initialEntity: () => E;
+  decorateEntity?: (entity: E) => T;
 }
 
-export interface ICommandRequest {
-  command: string;
-  replyToken: string;
-}
-
-export const newProcessorBuilder = <E, S extends StateMap<S>>(
-  options: IProcessorOptions<E, S>
-) => (entityId: string) => new CommandProcessor(options, entityId);
-
-export class CommandProcessor<E, S extends StateMap<S>> {
+export class CommandProcessor<E, S extends StateMap<S>, T> {
   private readonly repository: SimpleGetSetRepository<ITuple<E, IState<S>>>;
 
   private entity: E | undefined;
@@ -39,7 +30,7 @@ export class CommandProcessor<E, S extends StateMap<S>> {
   private oldState: IState<S> | undefined;
 
   constructor(
-    private readonly options: IProcessorOptions<E, S>,
+    private readonly options: IProcessorOptions<E, S, T>,
     entityId: string
   ) {
     this.repository = new SimpleGetSetRepository({
@@ -51,8 +42,8 @@ export class CommandProcessor<E, S extends StateMap<S>> {
   public prepareContext = async () => {
     const { initialEntity, initialState } = this.options;
     const tuple = await this.repository.get();
-    this.entity = tuple ? tuple.entity : initialEntity();
-    this.state = tuple ? tuple.state : initialState();
+    this.entity = !!tuple && !!tuple.entity ? tuple.entity : initialEntity();
+    this.state = !!tuple && !!tuple.state ? tuple.state : initialState();
     this.oldEntity = copy(this.entity);
     this.oldState = copy(this.state);
   };
@@ -63,26 +54,31 @@ export class CommandProcessor<E, S extends StateMap<S>> {
       !deepEqual(this.oldState, this.state)
     ) {
       const tuple: ITuple<E, IState<S>> = {
-        entity: this.entity!,
-        state: this.state!
+        entity: this.entity,
+        state: this.state
       };
       await this.repository.set(tuple);
     }
   };
 
-  public processCommand = async ({ command, replyToken }: ICommandRequest) => {
-    const holder = new EntityStateHolder<E, S>(this.entity!, this.state!);
+  public processCommand = async (command: string) => {
+    const { decorateEntity = this.castEntityImplicit } = this.options;
+    const holder = new EntityStateHolder<E, S, T>(
+      this.entity!,
+      this.state!,
+      decorateEntity
+    );
     logger.info(`Handle command[${command}] on state[${holder.state.name}]`);
-    logger.debug(`Entity[${this.entity}], State[${this.state}]`);
+    logger.debug(`Entity[${pjson(this.entity)}], State[${pjson(this.state)}]`);
 
-    const { routes, handlers } = this.options;
-    const handler = lookupHandler<E, S, any>(
-      routes[holder.state.name],
-      handlers[holder.state.name],
+    const { routeHandlers } = this.options;
+    const handler = lookupHandler<E, S, T, any>(
+      routeHandlers[holder.state.name],
       command
     );
     if (!handler) {
-      return;
+      logger.error(`No handler for a command[${command}]`);
+      return null;
     }
 
     let response = handler(holder);
@@ -95,17 +91,15 @@ export class CommandProcessor<E, S extends StateMap<S>> {
     this.entity = holder.entity;
     this.state = holder.state;
 
-    if (response) {
-      await line.reply(replyToken, response);
-    }
+    return response;
   };
-}
 
-export const processOne = async (
-  processor: CommandProcessor<any, any>,
-  request: ICommandRequest
-) => {
-  await processor.prepareContext();
-  await processor.processCommand(request);
-  await processor.storeContext();
-};
+  public async truncate() {
+    const { initialEntity, initialState } = this.options;
+    this.entity = this.oldEntity = initialEntity();
+    this.state = this.oldState = initialState();
+    await this.repository.delete();
+  }
+
+  private castEntityImplicit = (entity: E) => (entity as any) as T;
+}

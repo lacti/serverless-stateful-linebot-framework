@@ -1,16 +1,13 @@
-import { Handler } from "../../src";
-import p from "../models/route";
-import { UserState } from "../models/state";
-import { IUser } from "../models/user";
+import tk from "../toolkit";
 
 export type GreetingCommand = {
   greeting: void;
 };
 
-const handlers: Handler<IUser, UserState, GreetingCommand> = {
-  greeting: () => "안녕하세요!"
-};
+const handlers = tk.handlers<GreetingCommand>({
+  greeting: ({ context: { t } }) => `안녕하세요! ${t.name}`
+});
 
-export default p.handler({
+export default tk.partialStateHandlers({
   empty: handlers
 });

@@ -56,7 +56,7 @@ export const installWebhook = (handler: CommandHandler) => async (
     }
     return { statusCode: 200, body: "OK" };
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return { statusCode: 500, body: error.message || "FAIL" };
   }
 };

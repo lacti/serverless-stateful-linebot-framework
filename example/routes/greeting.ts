@@ -1,14 +1,13 @@
-import { Route } from "../../src";
 import { GreetingCommand } from "../handlers/greeting";
-import p from "../models/route";
+import tk from "../toolkit";
 
-const routes: Route<GreetingCommand> = {
+const routes = tk.routes<GreetingCommand>({
   greeting: {
     regex: /안녕/,
     parse: () => undefined
   }
-};
+});
 
-export default p.route({
+export default tk.partialStateRoutes({
   empty: routes
 });

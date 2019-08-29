@@ -1,7 +1,4 @@
-import { Handler } from "../../src";
-import p from "../models/route";
-import { UserState } from "../models/state";
-import { IUser } from "../models/user";
+import tk from "../toolkit";
 
 export type BudgetCommand = {
   addBudget: {
@@ -10,13 +7,13 @@ export type BudgetCommand = {
   };
 };
 
-const handlers: Handler<IUser, UserState, BudgetCommand> = {
+const handlers = tk.handlers<BudgetCommand>({
   addBudget: ({ context, name, amount }) => {
     const userName = context.entity.name;
     return `${userName}, 이름[${name}]으로 ${amount}를 추가했습니다.`;
   }
-};
+});
 
-export default p.handler({
+export default tk.partialStateHandlers({
   budget: handlers
 });

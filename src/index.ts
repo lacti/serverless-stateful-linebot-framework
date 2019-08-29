@@ -4,6 +4,6 @@ export {
   IWithIndex,
   StateMap
 } from "./entity"; // Except meaningless `IState`
-export * from "./handler";
-export * from "./actor";
-export * from "./line";
+export { toolkit } from "./handler";
+export { getSystem, newBasicReplyActor as newBasicActor } from "./actor";
+export { installWebhook, reply } from "./line";
