@@ -4,11 +4,12 @@ export interface IProcessorOptions<E, S extends StateMap<S>, T> {
     bucketPrefix?: string;
     routeHandlers: StateRouteHandlers<E, S, T>;
     initialState: () => IState<S>;
-    initialEntity: () => E;
+    initialEntity: (entityId: string) => E;
     decorateEntity?: (entity: E) => T;
 }
 export declare class CommandProcessor<E, S extends StateMap<S>, T> {
     private readonly options;
+    private readonly entityId;
     private readonly repository;
     private entity;
     private state;

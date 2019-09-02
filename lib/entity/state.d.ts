@@ -6,10 +6,11 @@ export interface IState<M extends StateMap<M>> {
     payload: M[keyof M];
 }
 export declare class EntityStateHolder<E, M extends StateMap<M>, T> {
+    readonly entityId: string;
     private currentEntity;
     private currentState;
     private readonly transform;
-    constructor(currentEntity: E, currentState: IState<M>, transform: (entity: E) => T);
+    constructor(entityId: string, currentEntity: E, currentState: IState<M>, transform: (entity: E) => T);
     update(entity: E): void;
     transit<K extends keyof M>(name: K, payload: M[K]): void;
     ensureState<K extends keyof M>(name: K): M[K] | undefined;
