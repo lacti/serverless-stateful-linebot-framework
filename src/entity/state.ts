@@ -7,6 +7,7 @@ export interface IState<M extends StateMap<M>> {
 
 export class EntityStateHolder<E, M extends StateMap<M>, T> {
   constructor(
+    public readonly entityId: string,
     private currentEntity: E,
     private currentState: IState<M>,
     private readonly transform: (entity: E) => T

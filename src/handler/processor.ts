@@ -17,7 +17,7 @@ export interface IProcessorOptions<E, S extends StateMap<S>, T> {
   bucketPrefix?: string;
   routeHandlers: StateRouteHandlers<E, S, T>;
   initialState: () => IState<S>;
-  initialEntity: () => E;
+  initialEntity: (entityId: string) => E;
   decorateEntity?: (entity: E) => T;
 }
 
@@ -31,7 +31,7 @@ export class CommandProcessor<E, S extends StateMap<S>, T> {
 
   constructor(
     private readonly options: IProcessorOptions<E, S, T>,
-    entityId: string
+    private readonly entityId: string
   ) {
     this.repository = new SimpleGetSetRepository({
       id: entityId,
@@ -42,7 +42,8 @@ export class CommandProcessor<E, S extends StateMap<S>, T> {
   public prepareContext = async () => {
     const { initialEntity, initialState } = this.options;
     const tuple = await this.repository.get();
-    this.entity = !!tuple && !!tuple.entity ? tuple.entity : initialEntity();
+    this.entity =
+      !!tuple && !!tuple.entity ? tuple.entity : initialEntity(this.entityId);
     this.state = !!tuple && !!tuple.state ? tuple.state : initialState();
     this.oldEntity = copy(this.entity);
     this.oldState = copy(this.state);
@@ -64,6 +65,7 @@ export class CommandProcessor<E, S extends StateMap<S>, T> {
   public processCommand = async (command: string) => {
     const { decorateEntity = this.castEntityImplicit } = this.options;
     const holder = new EntityStateHolder<E, S, T>(
+      this.entityId,
       this.entity!,
       this.state!,
       decorateEntity
@@ -96,7 +98,7 @@ export class CommandProcessor<E, S extends StateMap<S>, T> {
 
   public async truncate() {
     const { initialEntity, initialState } = this.options;
-    this.entity = this.oldEntity = initialEntity();
+    this.entity = this.oldEntity = initialEntity(this.entityId);
     this.state = this.oldState = initialState();
     await this.repository.delete();
   }
