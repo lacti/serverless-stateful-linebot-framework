@@ -1,9 +1,6 @@
-import {
-  ActorSystem,
-  InMemoryLock,
-  InMemoryQueue
-} from "@yingyeothon/actor-system";
-import { RedisLock, RedisQueue } from "@yingyeothon/actor-system-redis-support";
+import * as Actor from "@yingyeothon/actor-system";
+import { newRedisSubsystem } from "@yingyeothon/actor-system-redis-support";
+import * as InMemoryActorSupport from "@yingyeothon/actor-system/lib/support/inmemory";
 import { ConsoleLogger } from "@yingyeothon/logger";
 import IORedis from "ioredis";
 import mem from "mem";
@@ -22,39 +19,67 @@ const getRedis = mem(() => {
   });
 });
 
-export const getSystem = mem(() =>
+const subsys: Actor.IActorSubsystem =
   process.env.NODE_ENV === "test"
-    ? new ActorSystem({
-        queue: new InMemoryQueue(),
-        lock: new InMemoryLock(),
+    ? {
+        queue: new InMemoryActorSupport.InMemoryQueue(),
+        lock: new InMemoryActorSupport.InMemoryLock(),
+        awaiter: new InMemoryActorSupport.InMemoryAwaiter(),
+        shift: () => logger.error(`Please check your lambda's lifetime`),
         logger
-      })
-    : new ActorSystem({
-        queue: new RedisQueue({ redis: getRedis(), logger }),
-        lock: new RedisLock({ redis: getRedis(), logger }),
+      }
+    : {
+        ...newRedisSubsystem({
+          redis: getRedis(),
+          keyPrefix: "linebot",
+          logger
+        }),
+        shift: () => logger.error(`Please check your lambda's lifetime`),
         logger
-      })
-);
+      };
 
 export interface ICommandRequest {
   command: string;
   replyToken: string;
 }
 
-export const newBasicReplyActor = <E, S extends StateMap<S>, T>(
+class CommandActor {
+  constructor(
+    public readonly id: string,
+    private readonly processor: CommandProcessor<any, any, any>
+  ) {}
+
+  public onPrepare = async () => this.processor.prepareContext();
+  public onCommand = async () => this.processor.storeContext();
+  public onMessage = async ({ command, replyToken }: ICommandRequest) => {
+    const response = await this.processor.processCommand(command);
+    if (response) {
+      await reply(replyToken, response);
+    }
+  };
+  public onError = (error: Error) => logger.error(`ActorError`, this.id, error);
+}
+
+export const newBasicReplier = <E, S extends StateMap<S>, T>(
   newProcessor: (id: string) => CommandProcessor<E, S, T>
-) => (id: string) => {
-  const processor = newProcessor(id);
-  return getSystem().spawn<ICommandRequest>(id, actor =>
-    actor
-      .on("beforeAct", processor.prepareContext)
-      .on("afterAct", processor.storeContext)
-      .on("act", async ({ message: { command, replyToken } }) => {
-        const response = await processor.processCommand(command);
-        if (response) {
-          await reply(replyToken, response);
+) =>
+  mem((id: string) => {
+    const processor = newProcessor(id);
+    const env = Actor.newEnv(subsys)(new CommandActor(id, processor));
+
+    // I think it would not be touched 30 seconds.
+    return (item: ICommandRequest, timeoutMillis: number = 30 * 1000) =>
+      Actor.send(
+        env,
+        {
+          item,
+          awaitPolicy: Actor.AwaitPolicy.Commit,
+          awaitTimeoutMillis: timeoutMillis
+        },
+        {
+          aliveMillis: timeoutMillis,
+          oneShot: true,
+          shiftable: true
         }
-      })
-      .on("error", error => logger.error(`ActorError`, id, error))
-  );
-};
+      );
+  });

@@ -5,5 +5,5 @@ export {
   StateMap
 } from "./entity"; // Except meaningless `IState`
 export { toolkit } from "./handler";
-export { getSystem, newBasicReplyActor as newBasicActor } from "./actor";
+export { newBasicReplier } from "./actor";
 export { installWebhook, reply } from "./line";

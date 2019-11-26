@@ -1,4 +1,4 @@
-import { newBasicReplyActor } from "../actor";
+import { newBasicReplier } from "../actor";
 import { EntityStateHolder, StateMap } from "../entity";
 import { CommandProcessor, IProcessorOptions } from "./processor";
 import {
@@ -24,8 +24,8 @@ class Toolkit<E, S extends StateMap<S>, T> {
       new CommandProcessor<E, S, T>(options, entityId);
   }
 
-  public newActorGetter(options: IProcessorOptions<E, S, T>) {
-    return newBasicReplyActor<E, S, T>(this.newProcessorBuilder(options));
+  public newReplierGenerator(options: IProcessorOptions<E, S, T>) {
+    return newBasicReplier<E, S, T>(this.newProcessorBuilder(options));
   }
 
   public routes<R extends RouteMap<R>>(routes: Routes<R>): Routes<R> {
