@@ -14,7 +14,7 @@ export declare class EntityStateHolder<E, M extends StateMap<M>, T> {
     update(entity: E): void;
     transit<K extends keyof M>(name: K, payload: M[K]): void;
     ensureState<K extends keyof M>(name: K): M[K] | undefined;
-    readonly state: IState<M>;
-    readonly entity: E;
-    readonly t: T;
+    get state(): IState<M>;
+    get entity(): E;
+    get t(): T;
 }

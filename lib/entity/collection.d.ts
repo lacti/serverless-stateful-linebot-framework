@@ -10,7 +10,7 @@ export declare class EntityElementExtension<C extends {
     protected readonly entity: C;
     private readonly name;
     constructor(entity: C, name: ArrayKeySelector<C, E>);
-    readonly elements: E[];
+    get elements(): E[];
     find(predicate: (each: E) => boolean): E | undefined;
     filter(predicate: (each: E) => boolean): E[];
     findByIndex(index: number): E | undefined;
