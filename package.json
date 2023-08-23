@@ -1,6 +1,6 @@
 {
   "name": "serverless-stateful-linebot-framework",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Stateful LINE bot on the AWS Serverless",
   "repository": "https://github.com/lacti/serverless-stateful-linebot-framework",
   "author": "jaeyoung.choi <lactrious@gmail.com>",
@@ -15,28 +15,29 @@
     "lib"
   ],
   "scripts": {
+    "prebuild": "rm -rf lib && mkdir -p lib",
     "build": "tsc"
   },
   "dependencies": {
-    "@line/bot-sdk": "^6.8.3",
-    "@yingyeothon/actor-system": "^0.2.2",
-    "@yingyeothon/actor-system-aws-lambda-support": "^0.2.2",
-    "@yingyeothon/actor-system-redis-support": "^0.2.2",
-    "@yingyeothon/logger": "^0.2.1",
-    "@yingyeothon/repository": "^0.2.1",
-    "@yingyeothon/repository-s3": "^0.2.1",
-    "fast-copy": "^2.0.4",
-    "fast-equals": "^2.0.0",
-    "ioredis": "^4.14.1",
-    "mem": "^6.0.0"
+    "@line/bot-sdk": "^7.5.2",
+    "@yingyeothon/actor-system": "^0.4.0",
+    "@yingyeothon/actor-system-aws-lambda-support": "^0.4.0",
+    "@yingyeothon/actor-system-redis-support": "^0.4.0",
+    "@yingyeothon/logger": "^0.4.0",
+    "@yingyeothon/naive-redis": "^0.4.0",
+    "@yingyeothon/repository": "^0.4.0",
+    "@yingyeothon/repository-s3": "^0.4.0",
+    "fast-copy": "^3.0.1",
+    "fast-equals": "^5.0.1",
+    "mem": "8"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.36",
-    "@types/ioredis": "^4.0.19",
-    "@types/node": "10",
-    "prettier": "^1.19.1",
-    "tslint": "^5.20.1",
-    "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.7.2"
+    "@types/aws-lambda": "^8.10.119",
+    "@types/node": "20",
+    "eslint": "^8.47.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.2",
+    "typescript": "^5.1.6"
   }
 }
