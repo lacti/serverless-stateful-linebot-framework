@@ -4,10 +4,10 @@ import tk from "../toolkit";
 const routes = tk.routes<GreetingCommand>({
   greeting: {
     regex: /안녕/,
-    parse: () => undefined
-  }
+    parse: () => undefined,
+  },
 });
 
 export default tk.partialStateRoutes({
-  empty: routes
+  empty: routes,
 });

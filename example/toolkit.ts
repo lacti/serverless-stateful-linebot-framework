@@ -1,7 +1,7 @@
-import { toolkit } from "../src";
+import { User } from "./models/user";
 import { UserState } from "./models/state";
-import { IUser } from "./models/user";
+import { toolkit } from "../src";
 
-const tk = toolkit<IUser, UserState>();
+const tk = toolkit<User, UserState>();
 
 export default tk;

@@ -5,9 +5,9 @@ export type GreetingCommand = {
 };
 
 const handlers = tk.handlers<GreetingCommand>({
-  greeting: ({ context: { t } }) => `안녕하세요! ${t.name}`
+  greeting: ({ context: { t } }) => `안녕하세요! ${t.name}`,
 });
 
 export default tk.partialStateHandlers({
-  empty: handlers
+  empty: handlers,
 });
