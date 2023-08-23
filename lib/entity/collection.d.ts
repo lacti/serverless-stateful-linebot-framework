@@ -1,12 +1,12 @@
-declare type ArrayKeySelector<T, E> = {
+type ArrayKeySelector<T, E> = {
     [P in keyof T]-?: T[P] extends E[] ? P : never;
 }[keyof T];
-export interface IWithIndex {
+export interface WithIndex {
     index: number;
 }
 export declare class EntityElementExtension<C extends {
     [K in keyof C]: any;
-}, E extends IWithIndex> {
+}, E extends WithIndex> {
     protected readonly entity: C;
     private readonly name;
     constructor(entity: C, name: ArrayKeySelector<C, E>);

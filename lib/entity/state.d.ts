@@ -1,7 +1,7 @@
-export declare type StateMap<M> = {
+export type StateMap<M> = {
     [K in keyof M]: M[K];
 };
-export interface IState<M extends StateMap<M>> {
+export interface State<M extends StateMap<M>> {
     name: keyof M;
     payload: M[keyof M];
 }
@@ -10,11 +10,11 @@ export declare class EntityStateHolder<E, M extends StateMap<M>, T> {
     private currentEntity;
     private currentState;
     private readonly transform;
-    constructor(entityId: string, currentEntity: E, currentState: IState<M>, transform: (entity: E) => T);
+    constructor(entityId: string, currentEntity: E, currentState: State<M>, transform: (entity: E) => T);
     update(entity: E): void;
     transit<K extends keyof M>(name: K, payload: M[K]): void;
     ensureState<K extends keyof M>(name: K): M[K] | undefined;
-    get state(): IState<M>;
+    get state(): State<M>;
     get entity(): E;
     get t(): T;
 }

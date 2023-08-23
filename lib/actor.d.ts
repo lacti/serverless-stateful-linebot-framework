@@ -1,5 +1,5 @@
-import { StateMap } from "./entity";
 import { CommandProcessor } from "./handler";
+import { StateMap } from "./entity";
 export interface ICommandRequest {
     command: string;
     replyToken: string;

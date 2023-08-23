@@ -1,7 +1,7 @@
-import { EntityStateHolder, StateMap } from "../entity";
 import { CommandProcessor, IProcessorOptions } from "./processor";
+import { EntityStateHolder, StateMap } from "../entity";
 import { Handlers, RouteMap, Routes, StateHandlers, StateRouteHandlers, StateRoutes } from "./router";
-declare type VerifyKindaPartial<T, KP> = Partial<T> & {
+type VerifyKindaPartial<T, KP> = Partial<T> & {
     [K in keyof KP]-?: K extends keyof T ? T[K] : never;
 };
 declare class Toolkit<E, S extends StateMap<S>, T> {

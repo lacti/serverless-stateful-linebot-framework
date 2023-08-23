@@ -1,9 +1,9 @@
-import { IState, StateMap } from "../entity";
+import { State, StateMap } from "../entity";
 import { StateRouteHandlers } from "./router";
 export interface IProcessorOptions<E, S extends StateMap<S>, T> {
     bucketPrefix?: string;
     routeHandlers: StateRouteHandlers<E, S, T>;
-    initialState: () => IState<S>;
+    initialState: () => State<S>;
     initialEntity: (entityId: string) => E;
     decorateEntity?: (entity: E) => T;
 }
