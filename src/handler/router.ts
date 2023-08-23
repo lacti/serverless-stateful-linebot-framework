@@ -16,7 +16,7 @@ export type Handler<
   S extends StateMap<S>,
   T,
   R extends RouteMap<R>,
-  K extends keyof R
+  K extends keyof R,
 > = (
   args: { context: EntityStateHolder<E, S, T> } & R[K]
 ) => string | Promise<string>;
@@ -45,7 +45,7 @@ export const lookupHandler = <
   E,
   S extends StateMap<S>,
   T,
-  R extends RouteMap<R>
+  R extends RouteMap<R>,
 >(
   routeHandlers: Array<RouteHandler<E, S, T>>,
   command: string

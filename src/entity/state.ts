@@ -1,6 +1,6 @@
 export type StateMap<M> = { [K in keyof M]: M[K] };
 
-export interface IState<M extends StateMap<M>> {
+export interface State<M extends StateMap<M>> {
   name: keyof M;
   payload: M[keyof M];
 }
@@ -9,7 +9,7 @@ export class EntityStateHolder<E, M extends StateMap<M>, T> {
   constructor(
     public readonly entityId: string,
     private currentEntity: E,
-    private currentState: IState<M>,
+    private currentState: State<M>,
     private readonly transform: (entity: E) => T
   ) {}
 
@@ -20,7 +20,7 @@ export class EntityStateHolder<E, M extends StateMap<M>, T> {
   public transit<K extends keyof M>(name: K, payload: M[K]) {
     this.currentState = {
       name,
-      payload
+      payload,
     };
   }
 

@@ -7,6 +7,6 @@ export const newInternalRepository = mem((prefix: string) =>
     ? new InMemoryRepository()
     : new S3Repository({
         bucketName: process.env.BUCKET_NAME!,
-        prefix
+        prefix,
       })
 );

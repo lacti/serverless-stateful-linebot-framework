@@ -1,4 +1,4 @@
-import { IRepository } from "@yingyeothon/repository";
+import { Repository } from "@yingyeothon/repository";
 import { newInternalRepository } from "./builder";
 
 interface ISimpleGetSetRepositoryOptions {
@@ -8,7 +8,7 @@ interface ISimpleGetSetRepositoryOptions {
 
 export class SimpleGetSetRepository<T> {
   private readonly id: string;
-  private readonly internal: IRepository;
+  private readonly internal: Repository;
 
   constructor({ prefix, id }: ISimpleGetSetRepositoryOptions) {
     this.id = id;

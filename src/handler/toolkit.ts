@@ -1,18 +1,20 @@
-import { newBasicReplier } from "../actor";
-import { EntityStateHolder, StateMap } from "../entity";
 import { CommandProcessor, IProcessorOptions } from "./processor";
+import { EntityStateHolder, StateMap } from "../entity";
 import {
   Handlers,
   RouteMap,
   Routes,
   StateHandlers,
   StateRouteHandlers,
-  StateRoutes
+  StateRoutes,
 } from "./router";
 
+import { newBasicReplier } from "../actor";
+
 // https://stackoverflow.com/a/54497408
-type VerifyKindaPartial<T, KP> = Partial<T> &
-  { [K in keyof KP]-?: K extends keyof T ? T[K] : never };
+type VerifyKindaPartial<T, KP> = Partial<T> & {
+  [K in keyof KP]-?: K extends keyof T ? T[K] : never;
+};
 
 class Toolkit<E, S extends StateMap<S>, T> {
   public options(options: IProcessorOptions<E, S, T>) {
@@ -80,7 +82,7 @@ class Toolkit<E, S extends StateMap<S>, T> {
         for (const routeKey of Object.keys(routes)) {
           result[state]!.push({
             ...routes[routeKey],
-            handler: handlers[routeKey]
+            handler: handlers[routeKey],
           });
         }
       }

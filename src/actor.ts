@@ -1,41 +1,42 @@
 import * as Actor from "@yingyeothon/actor-system";
-import { newRedisSubsystem } from "@yingyeothon/actor-system-redis-support";
 import * as InMemoryActorSupport from "@yingyeothon/actor-system/lib/support/inmemory";
-import { ConsoleLogger } from "@yingyeothon/logger";
-import IORedis from "ioredis";
-import mem from "mem";
-import { StateMap } from "./entity";
+
 import { CommandProcessor } from "./handler";
+import { ConsoleLogger } from "@yingyeothon/logger";
+import { StateMap } from "./entity";
+import mem from "mem";
+import { newRedisSubsystem } from "@yingyeothon/actor-system-redis-support";
+import redisConnect from "@yingyeothon/naive-redis/lib/connection";
 import { reply } from "./line";
 
 const logger = new ConsoleLogger("debug");
-const getRedis = mem(() => {
+const getRedisConnection = mem(() => {
   if (process.env.NODE_ENV === "test") {
     throw new Error();
   }
-  return new IORedis({
-    host: process.env.REDIS_HOST,
-    password: process.env.REDIS_PASSWORD
+  return redisConnect({
+    host: process.env.REDIS_HOST!,
+    password: process.env.REDIS_PASSWORD,
   });
 });
 
-const subsys: Actor.IActorSubsystem =
+const subsys =
   process.env.NODE_ENV === "test"
     ? {
         queue: new InMemoryActorSupport.InMemoryQueue(),
         lock: new InMemoryActorSupport.InMemoryLock(),
         awaiter: new InMemoryActorSupport.InMemoryAwaiter(),
         shift: () => logger.error(`Please check your lambda's lifetime`),
-        logger
+        logger,
       }
     : {
         ...newRedisSubsystem({
-          redis: getRedis(),
+          connection: getRedisConnection(),
           keyPrefix: "linebot",
-          logger
+          logger,
         }),
         shift: () => logger.error(`Please check your lambda's lifetime`),
-        logger
+        logger,
       };
 
 export interface ICommandRequest {
@@ -65,7 +66,11 @@ export const newBasicReplier = <E, S extends StateMap<S>, T>(
 ) =>
   mem((id: string) => {
     const processor = newProcessor(id);
-    const env = Actor.newEnv(subsys)(new CommandActor(id, processor));
+    const env = {
+      ...Actor.singleConsumer,
+      ...subsys,
+      ...new CommandActor(id, processor),
+    };
 
     // I think it would not be touched 30 seconds.
     return (item: ICommandRequest, timeoutMillis: number = 30 * 1000) =>
@@ -74,12 +79,12 @@ export const newBasicReplier = <E, S extends StateMap<S>, T>(
         {
           item,
           awaitPolicy: Actor.AwaitPolicy.Commit,
-          awaitTimeoutMillis: timeoutMillis
+          awaitTimeoutMillis: timeoutMillis,
         },
         {
           aliveMillis: timeoutMillis,
           oneShot: true,
-          shiftable: true
+          shiftable: true,
         }
       );
   });

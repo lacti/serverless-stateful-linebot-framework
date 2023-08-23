@@ -1,9 +1,10 @@
+import { EntityStateHolder, State, StateMap } from "../entity";
+import { StateRouteHandlers, lookupHandler } from "./router";
+
 import { ConsoleLogger } from "@yingyeothon/logger";
+import { SimpleGetSetRepository } from "../repository";
 import copy from "fast-copy";
 import { deepEqual } from "fast-equals";
-import { EntityStateHolder, IState, StateMap } from "../entity";
-import { SimpleGetSetRepository } from "../repository";
-import { lookupHandler, StateRouteHandlers } from "./router";
 
 const logger = new ConsoleLogger("debug");
 const pjson = (obj: any) => JSON.stringify(obj, null, 2);
@@ -16,18 +17,18 @@ interface ITuple<E, S> {
 export interface IProcessorOptions<E, S extends StateMap<S>, T> {
   bucketPrefix?: string;
   routeHandlers: StateRouteHandlers<E, S, T>;
-  initialState: () => IState<S>;
+  initialState: () => State<S>;
   initialEntity: (entityId: string) => E;
   decorateEntity?: (entity: E) => T;
 }
 
 export class CommandProcessor<E, S extends StateMap<S>, T> {
-  private readonly repository: SimpleGetSetRepository<ITuple<E, IState<S>>>;
+  private readonly repository: SimpleGetSetRepository<ITuple<E, State<S>>>;
 
   private entity: E | undefined;
-  private state: IState<S> | undefined;
+  private state: State<S> | undefined;
   private oldEntity: E | undefined;
-  private oldState: IState<S> | undefined;
+  private oldState: State<S> | undefined;
 
   constructor(
     private readonly options: IProcessorOptions<E, S, T>,
@@ -35,7 +36,7 @@ export class CommandProcessor<E, S extends StateMap<S>, T> {
   ) {
     this.repository = new SimpleGetSetRepository({
       id: entityId,
-      prefix: options.bucketPrefix
+      prefix: options.bucketPrefix,
     });
   }
 
@@ -54,9 +55,9 @@ export class CommandProcessor<E, S extends StateMap<S>, T> {
       !deepEqual(this.oldEntity, this.entity) ||
       !deepEqual(this.oldState, this.state)
     ) {
-      const tuple: ITuple<E, IState<S>> = {
+      const tuple: ITuple<E, State<S>> = {
         entity: this.entity,
-        state: this.state
+        state: this.state,
       };
       await this.repository.set(tuple);
     }
@@ -70,7 +71,9 @@ export class CommandProcessor<E, S extends StateMap<S>, T> {
       this.state!,
       decorateEntity
     );
-    logger.info(`Handle command[${command}] on state[${holder.state.name}]`);
+    logger.info(
+      `Handle command[${command}] on state[${String(holder.state.name)}]`
+    );
     logger.debug(`Entity[${pjson(this.entity)}], State[${pjson(this.state)}]`);
 
     const { routeHandlers } = this.options;
@@ -103,5 +106,5 @@ export class CommandProcessor<E, S extends StateMap<S>, T> {
     await this.repository.delete();
   }
 
-  private castEntityImplicit = (entity: E) => (entity as any) as T;
+  private castEntityImplicit = (entity: E) => entity as any as T;
 }

@@ -2,16 +2,18 @@ type ArrayKeySelector<T, E> = {
   [P in keyof T]-?: T[P] extends E[] ? P : never;
 }[keyof T];
 
-const filterByIndex = (index: number) => <T extends IWithIndex>(each: T) =>
-  each.index === index;
+const filterByIndex =
+  (index: number) =>
+  <T extends WithIndex>(each: T) =>
+    each.index === index;
 
-export interface IWithIndex {
+export interface WithIndex {
   index: number;
 }
 
 export class EntityElementExtension<
   C extends { [K in keyof C]: any },
-  E extends IWithIndex
+  E extends WithIndex,
 > {
   constructor(
     protected readonly entity: C,
@@ -35,22 +37,23 @@ export class EntityElementExtension<
   }
 
   public add(fields: Omit<E, "index">) {
-    const insertId = Math.max(...this.elements.map(each => each.index), 0) + 1;
+    const insertId =
+      Math.max(...this.elements.map((each) => each.index), 0) + 1;
     const newTuple = {
       ...fields,
-      index: insertId
+      index: insertId,
     } as E;
     this.elements.push(newTuple);
   }
 
   public update(index: number, fields: Partial<Omit<E, "index">>) {
-    const arrayIndex = this.elements.findIndex(each => each.index === index);
+    const arrayIndex = this.elements.findIndex((each) => each.index === index);
     if (arrayIndex < 0) {
       return false;
     }
     this.elements[arrayIndex] = {
       ...this.elements[arrayIndex],
-      ...fields
+      ...fields,
     };
     return true;
   }
@@ -61,7 +64,7 @@ export class EntityElementExtension<
 
   public removeWhere(predicate: (each: E) => boolean) {
     (this.entity[this.name] as E[]) = this.elements.filter(
-      each => !predicate(each)
+      (each) => !predicate(each)
     );
   }
 }
