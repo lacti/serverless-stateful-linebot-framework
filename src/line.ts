@@ -21,7 +21,9 @@ export const installWebhook =
   (handler: CommandHandler) =>
   async (gatewayEvent: awsTypes.APIGatewayEvent) => {
     try {
-      const signature = gatewayEvent.headers["X-Line-Signature"] as string;
+      const signature = gatewayEvent.headers[
+        line.LINE_SIGNATURE_HTTP_HEADER_NAME
+      ] as string;
       if (!signature) {
         throw new line.SignatureValidationFailed("no signature");
       }
