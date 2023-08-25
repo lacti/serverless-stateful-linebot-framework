@@ -60,6 +60,9 @@ export class CommandProcessor<E, S extends StateMap<S>, T> {
         state: this.state,
       };
       await this.repository.set(tuple);
+
+      this.oldEntity = copy(this.entity);
+      this.oldState = copy(this.state);
     }
   };
 
@@ -91,6 +94,7 @@ export class CommandProcessor<E, S extends StateMap<S>, T> {
       response = await response;
     }
     logger.debug(`Result of command[${command}]: ${response}`);
+    logger.debug(`Entity[${pjson(this.entity)}], State[${pjson(this.state)}]`);
 
     // Update memory models after handling
     this.entity = holder.entity;

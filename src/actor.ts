@@ -51,7 +51,7 @@ class CommandActor {
   ) {}
 
   public onPrepare = async () => this.processor.prepareContext();
-  public onCommand = async () => this.processor.storeContext();
+  public onCommit = async () => this.processor.storeContext();
   public onMessage = async ({ command, replyToken }: ICommandRequest) => {
     const response = await this.processor.processCommand(command);
     if (response) {
