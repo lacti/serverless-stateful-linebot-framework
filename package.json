@@ -1,6 +1,6 @@
 {
   "name": "serverless-stateful-linebot-framework",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Stateful LINE bot on the AWS Serverless",
   "repository": "https://github.com/lacti/serverless-stateful-linebot-framework",
   "author": "jaeyoung.choi <lactrious@gmail.com>",
